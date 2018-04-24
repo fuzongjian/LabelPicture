@@ -20,13 +20,13 @@ class ViewController: UIViewController {
         let reset = UIButton(type: .system)
         reset.frame = CGRect(x: 0, y: 100, width: 100, height: 40)
         reset.center.x = view.center.x
-        reset.setTitle("重置", for: .normal)
+        reset.setTitle("下一个", for: .normal)
         reset.addTarget(self, action: #selector(resetButtonClicked(_:)), for: .touchUpInside)
         view.addSubview(reset)
     }
     @objc func resetButtonClicked(_ sender: UIButton) -> Void {
-        pictureView.removeFromSuperview()
-        
+       
+        pictureView.saveAndNext()
         
     }
     override func didReceiveMemoryWarning() {
