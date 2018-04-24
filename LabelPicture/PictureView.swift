@@ -20,10 +20,17 @@ enum PanningMode {
 }
 class PictureView: UIView {
     /*************************** 配置相关***********************/
-    let RATE: CGFloat = 40 // 灵敏度
-    var panningMode: PanningMode = .none
-    lazy var currentRect = {return CGRect(x: 20, y: 20, width: 150, height: 150) }() // 当前的操作的矩形框
+    let RATE: CGFloat = 30 // 灵敏度
+    var isInitStart = false // 首个坐标初始化
+    let LINEWIDTH: CGFloat = 2 // 线的宽度
+    var panningMode: PanningMode = .none // 手指所点的区域
+    lazy var rectArray = { return NSMutableArray() }() // 记录所画框的坐标
+    lazy var currentRect = {return CGRect() }() // 当前的操作的矩形框
     lazy var currentPoint = {return CGPoint() }() // 记录第一次触摸点
+    lazy var testView = { return UIView() }()
+    lazy var bottomLeft = { return UIView() }()
+    lazy var bottomRight = { return UIView() }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         // 手势添加
@@ -31,35 +38,34 @@ class PictureView: UIView {
         // 关闭多点触摸
         self.isMultipleTouchEnabled = false
         
-        let topLeft = UIView()
-        topLeft.frame = topLeftCorner
-        topLeft.backgroundColor = UIColor.red
-        self.addSubview(topLeft)
-        
-        let topRight = UIView()
-        topRight.frame = topRightCorner
-        topRight.backgroundColor = UIColor.yellow
-        self.addSubview(topRight)
-        
-        let bottomLeft = UIView()
-        bottomLeft.frame = bottomLeftCorner
-        bottomLeft.backgroundColor = UIColor.blue
-        self.addSubview(bottomLeft)
-        
-        let bottomRight = UIView()
-        bottomRight.frame = bottomRightCorner
-        bottomRight.backgroundColor = UIColor.green
-        self.addSubview(bottomRight)
-        
-        let center = UIView()
-        center.frame = centerRect
-        center.backgroundColor = UIColor.black
-        self.addSubview(center)
-        
-        let ee = UIView()
-        ee.frame = bottomEdgeRect
-        ee.backgroundColor = UIColor.brown
-        self.addSubview(ee)
+//        let topLeft = UIView()
+//        topLeft.frame = topLeftCorner()
+//        topLeft.backgroundColor = UIColor.red
+//        self.addSubview(topLeft)
+//
+//        let topRight = UIView()
+//        topRight.frame = topRightCorner()
+//        topRight.backgroundColor = UIColor.yellow
+//        self.addSubview(topRight)
+//
+//
+//        bottomLeft.frame = bottomLeftCorner()
+//        bottomLeft.backgroundColor = UIColor.blue
+//        self.addSubview(bottomLeft)
+//
+//        bottomRight.frame = bottomRightCorner()
+//        bottomRight.backgroundColor = UIColor.green
+//        self.addSubview(bottomRight)
+//
+//        let center = UIView()
+//        center.frame = centerRect()
+//        center.backgroundColor = UIColor.black
+//        self.addSubview(center)
+//
+//
+//        testView.frame = topEdgeRect()
+//        testView.backgroundColor = UIColor.brown
+//        self.addSubview(testView)
     }
     override func draw(_ rect: CGRect) {
         //创建一个画布,用于将我们所画的东西在这个上面展示出来
@@ -69,10 +75,19 @@ class PictureView: UIView {
 //        context?.setFillColor(red: 1, green: 0, blue: 0, alpha: 1)
 //        context?.fillPath()
         //边框宽度
-        context?.setLineWidth(2)
+        context?.setLineWidth(LINEWIDTH)
         //边框颜色
         context?.setStrokeColor(red: 0, green: 1, blue: 0, alpha: 1)
         context?.stroke(currentRect)
+
+        
+        
+        let frame = CGRect(x: 20, y: 120, width: 60, height: 60)
+        context?.addRect(frame)
+        context?.setStrokeColor(UIColor.yellow.cgColor)
+        context?.stroke(frame)
+        
+        
     }
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -83,6 +98,11 @@ class PictureView: UIView {
         if touches.count == 1{
             guard let p = touches.first?.location(in: self)else{ return }
             currentPoint = p
+            if isInitStart == false{
+                currentRect = CGRect(origin: p, size: CGSize(width: 30, height: 30))
+                isInitStart = true
+            }
+            
         }
     }
     // 添加手势
@@ -108,136 +128,215 @@ class PictureView: UIView {
             panningMode = getPannigModeByPoint(point)
             panEdge(sender)
         }
-   
-        
-//        sender.setTranslation(CGPoint.zero, in: self)
+        // 非常重要
+        sender.setTranslation(CGPoint.zero, in: self)
         
     }
     func panCorner(_ sender: UIPanGestureRecognizer) -> Void {
+        var new_currentRect = currentRect
+        let point = sender.translation(in: self)
         if panningMode == .topLeft {
-            print("topLeft")
+            if new_currentRect.maxX < self.bounds.width{
+                new_currentRect.origin.x += point.x
+                new_currentRect.size.width -= point.x
+            }
+            if new_currentRect.maxY < self.bounds.height{
+                new_currentRect.origin.y += point.y
+                new_currentRect.size.height -= point.y
+            }
+            currentRect = new_currentRect
         }else if panningMode == .topRight{
-            print("topRight")
+            if new_currentRect.maxX < self.bounds.width{
+                new_currentRect.size.width += point.x
+            }
+            if new_currentRect.maxY < self.bounds.height{
+                new_currentRect.origin.y += point.y
+                new_currentRect.size.height -= point.y
+            }
+            currentRect = new_currentRect
         }else if panningMode == .bottomLeft {
-            print("bottomLeft")
+            if new_currentRect.maxX < self.bounds.width{
+                new_currentRect.origin.x += point.x
+                new_currentRect.size.width -= point.x
+            }
+            if new_currentRect.maxY < self.bounds.height{
+                new_currentRect.size.height += point.y
+            }
+            currentRect = new_currentRect
         }else{
-            print("bottomRight")
+            if new_currentRect.maxX < self.bounds.width{
+                new_currentRect.size.width += point.x
+            }
+            if new_currentRect.maxY < self.bounds.height{
+                new_currentRect.size.height += point.y
+            }
+            currentRect = new_currentRect
         }
+        if isRevertX() == true {
+            new_currentRect.size.width = self.frame.width - new_currentRect.minX - LINEWIDTH
+            currentRect = new_currentRect
+        }
+        if isRevertY() == true {
+            new_currentRect.size.height = self.frame.height - new_currentRect.minY - LINEWIDTH
+            currentRect = new_currentRect
+        }
+        setNeedsDisplay()
     }
     func panEdge(_ sender: UIPanGestureRecognizer) -> Void {
         var new_currentRect = currentRect
         let point = sender.translation(in: self)
-        print("point === \(point)")
-        if panningMode == .top || panningMode == .bottom {
-            print("top-bottom")
+        
+        if panningMode == .top{
             if(new_currentRect.maxY < self.frame.height){
-                new_currentRect.size.height += point.y
+                new_currentRect.origin.y += point.y
+                new_currentRect.size.height -= point.y
             }else{
-                new_currentRect.size.height = self.frame.height - new_currentRect.minY
-            }
-        }else if panningMode == .bottom {
-            print("bottom---1\(currentRect)")
-            if(new_currentRect.maxY < self.frame.height){
-                new_currentRect.size.height += point.y
-            }else{
-                new_currentRect.size.height = self.frame.height - new_currentRect.minY
+                new_currentRect.size.height = self.frame.height - new_currentRect.minY + LINEWIDTH
             }
             currentRect = new_currentRect
-            print("bottom---2\(currentRect)")
+        }else if panningMode == .bottom {
+            if new_currentRect.maxY < self.frame.height{
+                new_currentRect.size.height += point.y
+            }else{
+                new_currentRect.size.height = self.frame.height - new_currentRect.minY - LINEWIDTH
+            }
+            currentRect = new_currentRect
         }else if panningMode == .left {
-            print("left")
+            if new_currentRect.maxX < self.frame.width{
+                new_currentRect.origin.x += point.x
+                new_currentRect.size.width -= point.x
+            }else{
+                new_currentRect.size.width = self.frame.width - new_currentRect.minX - LINEWIDTH
+            }
+            currentRect = new_currentRect
         }else if panningMode == .right {
-            print("right")
+            if new_currentRect.maxX < self.frame.width{
+                new_currentRect.size.width += point.x
+            }else{
+                new_currentRect.size.width = self.frame.width - new_currentRect.minX - LINEWIDTH
+            }
+            currentRect = new_currentRect
+        }
+        if isRevertX() == true {
+            new_currentRect.size.width = self.frame.width - new_currentRect.minX - LINEWIDTH
+            currentRect = new_currentRect
+        }
+        if isRevertY() == true {
+            new_currentRect.size.height = self.frame.height - new_currentRect.minY - LINEWIDTH
+            currentRect = new_currentRect
         }
         setNeedsDisplay()
     }
     func panCenter(_ sender: UIPanGestureRecognizer) -> Void {
-        print("center")
-        return
-        print("\(self.frame.width)---\(currentRect.minX)")
+        var new_currentRect = currentRect
         let point = sender.translation(in: self)
+        guard new_currentRect.minY > 0 else {
+            new_currentRect.origin.y = LINEWIDTH
+            currentRect = new_currentRect
+            setNeedsDisplay()
+            return
+        }
+        
         currentRect.origin.x += point.x
         currentRect.origin.y += point.y
-        
-        if currentRect.minX < self.bounds.minX {
-            currentRect.origin.x = self.bounds.minX
-        }else if currentRect.maxX > self.frame.width {
-            currentRect.size.width = self.frame.width - currentRect.origin.x
+        if isRevertX() == true{
+            new_currentRect.size.width = self.frame.width - new_currentRect.minX - LINEWIDTH
+            currentRect = new_currentRect
         }
-        
-        if currentRect.minY < self.bounds.minY {
-            currentRect.origin.y = self.frame.minY
-        }else if currentRect.maxY > self.frame.height{
-            currentRect.size.height = self.frame.height - currentRect.origin.y
+        if isRevertY() == true {
+            new_currentRect.size.height = self.frame.height - new_currentRect.minY - LINEWIDTH
+            currentRect = new_currentRect
         }
-        
-        print("\(point)")
         setNeedsDisplay()
     }
     // 画出来的框框不能超过大框框
-    func isDrawRect() -> Bool {
-        return self.frame.size.width > currentRect.maxX+2 && self.frame.size.height > currentRect.maxY+2
+    func isRevertX() -> Bool {
+        overHidden()
+        return self.currentRect.maxX > self.frame.width
+    }
+    func isRevertY() -> Bool {
+        overHidden()
+        return self.currentRect.maxY > self.frame.height
+    }
+    func overHidden() -> Void {
+        var new_currentRect = currentRect
+        if new_currentRect.minY < 0 {
+            new_currentRect.origin.y = LINEWIDTH
+            currentRect = new_currentRect
+        }
+        if new_currentRect.minX < 0 {
+            new_currentRect.origin.x = LINEWIDTH
+            currentRect = new_currentRect
+        }
+        setNeedsDisplay()
     }
     // 判断触摸的点是否在四个角落
     func isCornerContainsPoint(_ point: CGPoint) -> Bool {
-        return topLeftCorner.contains(point) || topRightCorner.contains(point) || bottomLeftCorner.contains(point) || bottomRightCorner.contains(point)
+        return topLeftCorner().contains(point) || topRightCorner().contains(point) || bottomLeftCorner().contains(point) || bottomRightCorner().contains(point)
     }
     func isEdgeContainsPoint(_ point: CGPoint) -> Bool {
-        return topEdgeRect.contains(point) || bottomEdgeRect.contains(point) || leftEdgeRect.contains(point) || rightEdgeRect.contains(point)
+        return topEdgeRect().contains(point) || bottomEdgeRect().contains(point) || leftEdgeRect().contains(point) || rightEdgeRect().contains(point)
     }
     func isInCenterContainsPoint(_ point: CGPoint) -> Bool {
-        return centerRect.contains(point)
+        return centerRect().contains(point)
     }
     // 获得手势状态
     func getPannigModeByPoint(_ point: CGPoint) -> PanningMode {
-        if topLeftCorner.contains(point){
+        if topLeftCorner().contains(point){
             return .topLeft
-        }else if topRightCorner.contains(point){
+        }else if topRightCorner().contains(point){
             return .topRight
-        }else if bottomLeftCorner.contains(point){
+        }else if bottomLeftCorner().contains(point){
             return .bottomLeft
-        }else if bottomRightCorner.contains(point){
+        }else if bottomRightCorner().contains(point){
             return .bottomRight
-        }else if topEdgeRect.contains(point){
+        }else if topEdgeRect().contains(point){
             return .top
-        }else if bottomEdgeRect.contains(point){
+        }else if bottomEdgeRect().contains(point){
             return .bottom
-        }else if leftEdgeRect.contains(point){
+        }else if leftEdgeRect().contains(point){
             return .left
-        }else if rightEdgeRect.contains(point){
+        }else if rightEdgeRect().contains(point){
             return .right
         }
         return .none
     }
-    // lazy load
     /*****************************************四个角****************************************/
-    lazy var topLeftCorner = {
-        return CGRect(x: currentRect.minX - RATE / 2, y: currentRect.minY - RATE / 2, width: RATE, height: RATE)
-    }()
-    lazy var topRightCorner = {
-        return CGRect(x: currentRect.maxX - RATE / 2, y: currentRect.minY - RATE / 2, width: RATE, height: RATE)
-    }()
-    lazy var bottomLeftCorner = {
-        return CGRect(x: currentRect.minX - RATE / 2, y: currentRect.maxY - RATE / 2, width: RATE, height: RATE)
-    }()
-    lazy var bottomRightCorner = {
-        return CGRect(x: currentRect.maxX - RATE / 2, y: currentRect.maxY - RATE / 2, width: RATE, height: RATE)
-    }()
+    private func topLeftCorner() -> CGRect {
+        return CGRect(x: currentRect.minX - RATE, y: currentRect.minY - RATE, width: RATE*2, height: RATE*2)
+    }
+    private func topRightCorner() -> CGRect {
+        return CGRect(x: currentRect.maxX - RATE, y: currentRect.minY - RATE, width: RATE*2, height: RATE*2)
+    }
+    private func bottomLeftCorner() -> CGRect {
+        let frame = CGRect(x: currentRect.minX - RATE, y: currentRect.maxY - RATE, width: RATE*2, height: RATE*2)
+        bottomLeft.frame = frame
+        testView.frame = bottomEdgeRect()
+        return frame
+    }
+    private func bottomRightCorner() -> CGRect {
+        let frame = CGRect(x: currentRect.maxX - RATE, y: currentRect.maxY - RATE, width: RATE*2, height: RATE*2)
+        bottomRight.frame = frame
+        testView.frame = bottomEdgeRect()
+        return frame
+    }
     /*****************************************四条边****************************************/
-    lazy var topEdgeRect = {
-        return CGRect(x: RATE, y: 0, width: currentRect.width - RATE, height: RATE)
-    }()
-    lazy var bottomEdgeRect = {
-        return CGRect(x: RATE, y: currentRect.height, width: currentRect.width - RATE, height: RATE)
-    }()
-    lazy var leftEdgeRect = {
-        return CGRect(x: 0, y: RATE, width: RATE, height: currentRect.height - RATE)
-    }()
-    lazy var rightEdgeRect = {
-        return CGRect(x: currentRect.width, y: RATE, width: RATE, height: currentRect.height - RATE)
-    }()
+    private func topEdgeRect() -> CGRect {
+        return CGRect(x: currentRect.minX + RATE, y: currentRect.minY - RATE, width: currentRect.width - RATE*2, height: RATE*2)
+    }
+    private func bottomEdgeRect() -> CGRect {
+        let frame = CGRect(x: currentRect.minX + RATE, y: currentRect.maxY - RATE , width: currentRect.width - RATE*2, height: RATE*2)
+        testView.frame = frame
+        return frame
+    }
+    private func leftEdgeRect() -> CGRect {
+        return CGRect(x: currentRect.minX - RATE, y: currentRect.minY + RATE, width: currentRect.minY + RATE, height: currentRect.height - RATE*2)
+    }
+    private func rightEdgeRect() -> CGRect {
+        return CGRect(x:currentRect.maxX - RATE, y: currentRect.minY + RATE, width: RATE*2, height: currentRect.height - RATE*2)
+    }
     /*****************************************中间区域****************************************/
-    lazy var centerRect = {
-        return CGRect(x: RATE , y: RATE, width: currentRect.width - RATE, height: currentRect.height - RATE)
-    }()
+    private func centerRect() -> CGRect {
+        return CGRect(x: currentRect.minX + RATE , y: currentRect.minY + RATE, width: currentRect.width - RATE*2, height: currentRect.height - RATE*2)
+    }
 }
