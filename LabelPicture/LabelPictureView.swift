@@ -65,6 +65,9 @@ class LabelPictureView: UIView,UIScrollViewDelegate {
         if rect != CGRect.zero && rectArray.contains(rect!) == false {
             rectArray.add(rect!)
             colorArray.add(randomColor())
+            
+            drawImage()
+            overPictureView?.saveAndNext()
         }
         if rectArray.count == 0 { return NSMutableArray() }
         let resultArray = NSMutableArray()
