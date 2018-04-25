@@ -15,6 +15,7 @@
 		9B52E263208ED36E00399880 /* LabelPictureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B52E262208ED36E00399880 /* LabelPictureTests.swift */; };
 		9B52E26E208ED36E00399880 /* LabelPictureUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B52E26D208ED36E00399880 /* LabelPictureUITests.swift */; };
 		9B52E27C208ED3D000399880 /* PictureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B52E27B208ED3D000399880 /* PictureView.swift */; };
+		9B52E27E209007B400399880 /* LabelPictureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B52E27D209007B400399880 /* LabelPictureView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		9B52E26D208ED36E00399880 /* LabelPictureUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelPictureUITests.swift; sourceTree = "<group>"; };
 		9B52E26F208ED36E00399880 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9B52E27B208ED3D000399880 /* PictureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PictureView.swift; sourceTree = "<group>"; };
+		9B52E27D209007B400399880 /* LabelPictureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelPictureView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,6 +103,7 @@
 			children = (
 				9B52E24D208ED36E00399880 /* AppDelegate.swift */,
 				9B52E24F208ED36E00399880 /* ViewController.swift */,
+				9B52E27D209007B400399880 /* LabelPictureView.swift */,
 				9B52E27B208ED3D000399880 /* PictureView.swift */,
 				9B52E251208ED36E00399880 /* Main.storyboard */,
 				9B52E254208ED36E00399880 /* Assets.xcassets */,
@@ -262,6 +265,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9B52E27E209007B400399880 /* LabelPictureView.swift in Sources */,
 				9B52E27C208ED3D000399880 /* PictureView.swift in Sources */,
 				9B52E250208ED36E00399880 /* ViewController.swift in Sources */,
 				9B52E24E208ED36E00399880 /* AppDelegate.swift in Sources */,

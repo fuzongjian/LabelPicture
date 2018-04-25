@@ -18,58 +18,58 @@ enum PanningMode {
     case topRight
     case bottomRight
 }
-class PictureView: UIView {
+class PictureView: UIView,UIScrollViewDelegate {
     /*************************** 配置相关***********************/
     let RATE: CGFloat = 30 // 灵敏度
-    var isInitStart = false // 首个坐标初始化
-    let LINEWIDTH: CGFloat = 2 // 线的宽度
-    var panningMode: PanningMode = .none // 手指所点的区域
     lazy var rectArray = { return NSMutableArray() }() // 记录所画框的坐标
     lazy var colorArray = { return NSMutableArray() }() // 记录随机颜色
-    lazy var currentRect = {return CGRect() }() // 当前的操作的矩形框
-    lazy var currentPoint = {return CGPoint() }() // 记录第一次触摸点
-    lazy var testView = { return UIView() }()
-    lazy var bottomLeft = { return UIView() }()
-    lazy var bottomRight = { return UIView() }()
     
+    private var isInitStart = false // 首个坐标初始化
+    private let LINEWIDTH: CGFloat = 2 // 线的宽度
+    private var panningMode: PanningMode = .none // 手指所点的区域
+    public lazy var currentRect = { return CGRect() }() // 当前的操作的矩形框
+    private lazy var currentPoint = {return CGPoint() }() // 记录第一次触摸点
+    var oldRect = CGRect.zero
     override init(frame: CGRect) {
         super.init(frame: frame)
         // 手势添加
         addGesture()
         // 关闭多点触摸
         self.isMultipleTouchEnabled = false
-    }
-    override func draw(_ rect: CGRect) {
-        //创建一个画布,用于将我们所画的东西在这个上面展示出来
-        let context = UIGraphicsGetCurrentContext()
-        //边框宽度
-        context?.setLineWidth(LINEWIDTH)
-        if rectArray.count != 0 {
-            for (index,value) in rectArray.enumerated(){
-                context?.addRect(value as! CGRect)
-                let color = colorArray.object(at: index) as! UIColor
-                context?.setStrokeColor(color.cgColor)
-                context?.stroke(value as! CGRect)
-            }
-        }
-        //画一个矩形
-        context?.addRect(currentRect)
-        //边框颜色
-        context?.setStrokeColor(red: 0, green: 1, blue: 0, alpha: 1)
-        context?.stroke(currentRect)
-
-    }
-    // 保存当前并开始下一个
-    public func saveAndNext() -> Void {
-        print("save --- next")
-        rectArray.add(currentRect)
-        colorArray.add(randomColor())
-        // 重置初始化状态
-        isInitStart = false
+        
+        self.backgroundColor = UIColor.clear
     }
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    override func draw(_ rect: CGRect) {
+        
+        //创建一个画布,用于将我们所画的东西在这个上面展示出来
+        let context = UIGraphicsGetCurrentContext()
+        //边框宽度
+        context?.setLineWidth(LINEWIDTH)
+//        if rectArray.count != 0 {
+//            for (index,value) in rectArray.enumerated(){
+//                context?.addRect(value as! CGRect)
+//                let color = colorArray.object(at: index) as! UIColor
+//                context?.setStrokeColor(color.cgColor)
+//                context?.stroke(value as! CGRect)
+//            }
+//        }
+        //画一个矩形
+        context?.addRect(currentRect)
+        //边框颜色 默认为红色
+        context?.setStrokeColor(red: 1, green: 0, blue: 0, alpha: 1)
+        context?.stroke(currentRect)
+    }
+    // 保存当前并开始下一个  同时还需要更新界面
+    public func saveAndNext() -> Void {
+        currentRect = CGRect.zero
+        setNeedsDisplay()
+        // 重置初始化状态
+        isInitStart = false
+    }
+    // touch事件
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
         // 记录第一个触摸点
@@ -80,7 +80,6 @@ class PictureView: UIView {
                 currentRect = CGRect(origin: p, size: CGSize(width: 30, height: 30))
                 isInitStart = true
             }
-            
         }
     }
     // 添加手势
@@ -110,6 +109,7 @@ class PictureView: UIView {
         sender.setTranslation(CGPoint.zero, in: self)
         
     }
+    // 角运动
     private func panCorner(_ sender: UIPanGestureRecognizer) -> Void {
         var new_currentRect = currentRect
         let point = sender.translation(in: self)
@@ -160,10 +160,10 @@ class PictureView: UIView {
         }
         setNeedsDisplay()
     }
+    // 边运动
     private func panEdge(_ sender: UIPanGestureRecognizer) -> Void {
         var new_currentRect = currentRect
         let point = sender.translation(in: self)
-        
         if panningMode == .top{
             if(new_currentRect.maxY < self.frame.height){
                 new_currentRect.origin.y += point.y
@@ -205,6 +205,7 @@ class PictureView: UIView {
         }
         setNeedsDisplay()
     }
+    // 中心运动
     private func panCenter(_ sender: UIPanGestureRecognizer) -> Void {
         var new_currentRect = currentRect
         let point = sender.translation(in: self)
@@ -235,6 +236,7 @@ class PictureView: UIView {
         overHidden()
         return self.currentRect.maxY > self.frame.height
     }
+    // 超出隐藏
     private  func overHidden() -> Void {
         var new_currentRect = currentRect
         if new_currentRect.minY < 0 {
@@ -286,25 +288,17 @@ class PictureView: UIView {
         return CGRect(x: currentRect.maxX - RATE, y: currentRect.minY - RATE, width: RATE*2, height: RATE*2)
     }
     private func bottomLeftCorner() -> CGRect {
-        let frame = CGRect(x: currentRect.minX - RATE, y: currentRect.maxY - RATE, width: RATE*2, height: RATE*2)
-        bottomLeft.frame = frame
-        testView.frame = bottomEdgeRect()
-        return frame
+        return CGRect(x: currentRect.minX - RATE, y: currentRect.maxY - RATE, width: RATE*2, height: RATE*2)
     }
     private func bottomRightCorner() -> CGRect {
-        let frame = CGRect(x: currentRect.maxX - RATE, y: currentRect.maxY - RATE, width: RATE*2, height: RATE*2)
-        bottomRight.frame = frame
-        testView.frame = bottomEdgeRect()
-        return frame
+        return CGRect(x: currentRect.maxX - RATE, y: currentRect.maxY - RATE, width: RATE*2, height: RATE*2)
     }
     /*****************************************四条边****************************************/
     private func topEdgeRect() -> CGRect {
         return CGRect(x: currentRect.minX + RATE, y: currentRect.minY - RATE, width: currentRect.width - RATE*2, height: RATE*2)
     }
     private func bottomEdgeRect() -> CGRect {
-        let frame = CGRect(x: currentRect.minX + RATE, y: currentRect.maxY - RATE , width: currentRect.width - RATE*2, height: RATE*2)
-        testView.frame = frame
-        return frame
+        return CGRect(x: currentRect.minX + RATE, y: currentRect.maxY - RATE , width: currentRect.width - RATE*2, height: RATE*2)
     }
     private func leftEdgeRect() -> CGRect {
         return CGRect(x: currentRect.minX - RATE, y: currentRect.minY + RATE, width: currentRect.minY + RATE, height: currentRect.height - RATE*2)
@@ -316,11 +310,5 @@ class PictureView: UIView {
     private func centerRect() -> CGRect {
         return CGRect(x: currentRect.minX + RATE , y: currentRect.minY + RATE, width: currentRect.width - RATE*2, height: currentRect.height - RATE*2)
     }
-    // 随机颜色
-    private func randomColor() -> UIColor {
-        let red = CGFloat(arc4random()%256)/255.0
-        let green = CGFloat(arc4random()%256)/255.0
-        let blue = CGFloat(arc4random()%256)/255.0
-        return UIColor(red: red, green: green, blue: blue, alpha: 1.0)
-    }
+
 }
