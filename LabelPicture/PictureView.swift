@@ -20,7 +20,7 @@ enum PanningMode {
 }
 class PictureView: UIView,UIScrollViewDelegate {
     /*************************** 配置相关***********************/
-    let RATE: CGFloat = 30 // 灵敏度
+    let RATE: CGFloat = 20 // 灵敏度
     lazy var rectArray = { return NSMutableArray() }() // 记录所画框的坐标
     lazy var colorArray = { return NSMutableArray() }() // 记录随机颜色
     
@@ -48,14 +48,6 @@ class PictureView: UIView,UIScrollViewDelegate {
         let context = UIGraphicsGetCurrentContext()
         //边框宽度
         context?.setLineWidth(LINEWIDTH)
-//        if rectArray.count != 0 {
-//            for (index,value) in rectArray.enumerated(){
-//                context?.addRect(value as! CGRect)
-//                let color = colorArray.object(at: index) as! UIColor
-//                context?.setStrokeColor(color.cgColor)
-//                context?.stroke(value as! CGRect)
-//            }
-//        }
         //画一个矩形
         context?.addRect(currentRect)
         //边框颜色 默认为红色
@@ -94,6 +86,12 @@ class PictureView: UIView,UIScrollViewDelegate {
         print("tap\(currentRect)")
     }
     @objc func panGestureClick(_ sender: UIPanGestureRecognizer) -> Void {
+        
+        if currentRect.maxX < 20 || currentRect.maxY < 20{
+            
+        }
+        
+        
         // 在这里应该先判断在那个区域，然后在根据情况进行拉长或收缩
         let point = sender.location(in: self)
         if isInCenterContainsPoint(point) {// 整体移动
