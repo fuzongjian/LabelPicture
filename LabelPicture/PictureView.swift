@@ -177,8 +177,6 @@ class PictureView: UIView,UIScrollViewDelegate {
             new_currentRect.size.height = MINSIZE.height
         }
         currentRect = new_currentRect
-
-        
         setNeedsDisplay()
     }
     // 边运动
