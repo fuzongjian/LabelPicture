@@ -20,7 +20,8 @@ enum PanningMode {
 }
 class PictureView: UIView,UIScrollViewDelegate {
     /*************************** 配置相关***********************/
-    let RATE: CGFloat = 20 // 灵敏度
+    private let RATE: CGFloat = 20 // 灵敏度
+    let MINSIZE : CGSize = CGSize(width: 10, height: 10) // 最小宽度
     lazy var rectArray = { return NSMutableArray() }() // 记录所画框的坐标
     lazy var colorArray = { return NSMutableArray() }() // 记录随机颜色
     
@@ -30,20 +31,37 @@ class PictureView: UIView,UIScrollViewDelegate {
     public lazy var currentRect = { return CGRect() }() // 当前的操作的矩形框
     private lazy var currentPoint = {return CGPoint() }() // 记录第一次触摸点
     var oldRect = CGRect.zero
+    var topView = UIView()
+    var bottomView = UIView()
+    var bottomCorner = UIView()
+    var bottomLeftCornerView = UIView()
     override init(frame: CGRect) {
         super.init(frame: frame)
-        // 手势添加
-        addGesture()
+        
         // 关闭多点触摸
         self.isMultipleTouchEnabled = false
         
         self.backgroundColor = UIColor.clear
+//        currentRect = CGRect(x: 100, y: 100, width: 150, height: 150)
+        
+//        topView.backgroundColor = UIColor.blue
+//        self.addSubview(topView)
+//        bottomView.backgroundColor = UIColor.brown
+//        self.addSubview(bottomView)
+//        bottomCorner.backgroundColor = UIColor.black
+//        self.addSubview(bottomCorner)
+//        bottomLeftCornerView.backgroundColor = UIColor.green
+//        self.addSubview(bottomLeftCornerView)
+        
+        // 手势添加
+        addGesture()
     }
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     override func draw(_ rect: CGRect) {
         
+        overHidden()
         //创建一个画布,用于将我们所画的东西在这个上面展示出来
         let context = UIGraphicsGetCurrentContext()
         //边框宽度
@@ -53,6 +71,15 @@ class PictureView: UIView,UIScrollViewDelegate {
         //边框颜色 默认为红色
         context?.setStrokeColor(red: 1, green: 0, blue: 0, alpha: 1)
         context?.stroke(currentRect)
+        
+        topView.frame = topEdgeRect()
+        bottomView.frame = bottomEdgeRect()
+        
+        bottomCorner.frame = topRightCorner()
+        bottomLeftCornerView.frame = topLeftCorner()
+    }
+    override func layoutSubviews() {
+        super.layoutSubviews()
     }
     // 保存当前并开始下一个  同时还需要更新界面
     public func saveAndNext() -> Void {
@@ -69,7 +96,7 @@ class PictureView: UIView,UIScrollViewDelegate {
             guard let p = touches.first?.location(in: self)else{ return }
             currentPoint = p
             if isInitStart == false{
-                currentRect = CGRect(origin: p, size: CGSize(width: 30, height: 30))
+                currentRect = CGRect(origin: p, size: CGSize(width: 5, height: 5))
                 isInitStart = true
             }
         }
@@ -83,15 +110,9 @@ class PictureView: UIView,UIScrollViewDelegate {
         self.addGestureRecognizer(pan)
     }
     @objc func tapGestureClick(_ sender: UITapGestureRecognizer) -> Void {
-        print("tap\(currentRect)")
+//        print("tap\(currentRect)")
     }
     @objc func panGestureClick(_ sender: UIPanGestureRecognizer) -> Void {
-        
-        if currentRect.maxX < 20 || currentRect.maxY < 20{
-            
-        }
-        
-        
         // 在这里应该先判断在那个区域，然后在根据情况进行拉长或收缩
         let point = sender.location(in: self)
         if isInCenterContainsPoint(point) {// 整体移动
@@ -103,9 +124,8 @@ class PictureView: UIView,UIScrollViewDelegate {
             panningMode = getPannigModeByPoint(point)
             panEdge(sender)
         }
-        // 非常重要
+        // 设置手势的偏移量（非常重要）
         sender.setTranslation(CGPoint.zero, in: self)
-        
     }
     // 角运动
     private func panCorner(_ sender: UIPanGestureRecognizer) -> Void {
@@ -120,7 +140,6 @@ class PictureView: UIView,UIScrollViewDelegate {
                 new_currentRect.origin.y += point.y
                 new_currentRect.size.height -= point.y
             }
-            currentRect = new_currentRect
         }else if panningMode == .topRight{
             if new_currentRect.maxX < self.bounds.width{
                 new_currentRect.size.width += point.x
@@ -129,7 +148,6 @@ class PictureView: UIView,UIScrollViewDelegate {
                 new_currentRect.origin.y += point.y
                 new_currentRect.size.height -= point.y
             }
-            currentRect = new_currentRect
         }else if panningMode == .bottomLeft {
             if new_currentRect.maxX < self.bounds.width{
                 new_currentRect.origin.x += point.x
@@ -138,7 +156,6 @@ class PictureView: UIView,UIScrollViewDelegate {
             if new_currentRect.maxY < self.bounds.height{
                 new_currentRect.size.height += point.y
             }
-            currentRect = new_currentRect
         }else{
             if new_currentRect.maxX < self.bounds.width{
                 new_currentRect.size.width += point.x
@@ -146,16 +163,22 @@ class PictureView: UIView,UIScrollViewDelegate {
             if new_currentRect.maxY < self.bounds.height{
                 new_currentRect.size.height += point.y
             }
-            currentRect = new_currentRect
         }
         if isRevertX() == true {
             new_currentRect.size.width = self.frame.width - new_currentRect.minX - LINEWIDTH
-            currentRect = new_currentRect
         }
         if isRevertY() == true {
             new_currentRect.size.height = self.frame.height - new_currentRect.minY - LINEWIDTH
-            currentRect = new_currentRect
         }
+        if currentRect.width < MINSIZE.width{
+            new_currentRect.size.width = MINSIZE.width
+        }
+        if currentRect.height < MINSIZE.height{
+            new_currentRect.size.height = MINSIZE.height
+        }
+        currentRect = new_currentRect
+
+        
         setNeedsDisplay()
     }
     // 边运动
@@ -176,7 +199,6 @@ class PictureView: UIView,UIScrollViewDelegate {
             }else{
                 new_currentRect.size.height = self.frame.height - new_currentRect.minY - LINEWIDTH
             }
-            currentRect = new_currentRect
         }else if panningMode == .left {
             if new_currentRect.maxX < self.frame.width{
                 new_currentRect.origin.x += point.x
@@ -184,31 +206,34 @@ class PictureView: UIView,UIScrollViewDelegate {
             }else{
                 new_currentRect.size.width = self.frame.width - new_currentRect.minX - LINEWIDTH
             }
-            currentRect = new_currentRect
         }else if panningMode == .right {
             if new_currentRect.maxX < self.frame.width{
                 new_currentRect.size.width += point.x
             }else{
                 new_currentRect.size.width = self.frame.width - new_currentRect.minX - LINEWIDTH
             }
-            currentRect = new_currentRect
+        }
+        if currentRect.width < MINSIZE.width{
+            new_currentRect.size.width = MINSIZE.width
+        }
+        if currentRect.height < MINSIZE.height{
+            new_currentRect.size.height = MINSIZE.height
         }
         if isRevertX() == true {
             new_currentRect.size.width = self.frame.width - new_currentRect.minX - LINEWIDTH
-            currentRect = new_currentRect
         }
         if isRevertY() == true {
             new_currentRect.size.height = self.frame.height - new_currentRect.minY - LINEWIDTH
-            currentRect = new_currentRect
         }
+        currentRect = new_currentRect
         setNeedsDisplay()
     }
     // 中心运动
     private func panCenter(_ sender: UIPanGestureRecognizer) -> Void {
         var new_currentRect = currentRect
         let point = sender.translation(in: self)
-        guard new_currentRect.minY > 0 else {
-            new_currentRect.origin.y = LINEWIDTH
+        guard new_currentRect.minY >= 0 else {
+            new_currentRect.origin.y = 0
             currentRect = new_currentRect
             setNeedsDisplay()
             return
@@ -245,7 +270,6 @@ class PictureView: UIView,UIScrollViewDelegate {
             new_currentRect.origin.x = LINEWIDTH
             currentRect = new_currentRect
         }
-        setNeedsDisplay()
     }
     // 判断触摸的点是否在四个角落
     private func isCornerContainsPoint(_ point: CGPoint) -> Bool {
@@ -280,23 +304,35 @@ class PictureView: UIView,UIScrollViewDelegate {
     }
     /*****************************************四个角****************************************/
     private func topLeftCorner() -> CGRect {
-        return CGRect(x: currentRect.minX - RATE, y: currentRect.minY - RATE, width: RATE*2, height: RATE*2)
+        if currentRect.width <= RATE * 4 {
+            return CGRect(x: currentRect.minX - RATE*2, y: currentRect.minY - RATE*3, width: currentRect.width*0.5+RATE*2, height: RATE*4)
+        }
+        return CGRect(x: currentRect.minX - RATE*2, y: currentRect.minY - RATE*3, width: RATE*4, height: RATE*4)
     }
     private func topRightCorner() -> CGRect {
-        return CGRect(x: currentRect.maxX - RATE, y: currentRect.minY - RATE, width: RATE*2, height: RATE*2)
+        if currentRect.width <= RATE * 4 {
+            return CGRect(x: currentRect.maxX - currentRect.width*0.5, y: currentRect.minY - RATE*3, width: currentRect.width*0.5+RATE*2, height: RATE*4)
+        }
+        return CGRect(x: currentRect.maxX - RATE*2, y: currentRect.minY - RATE*3, width: RATE*4, height: RATE*4)
     }
     private func bottomLeftCorner() -> CGRect {
-        return CGRect(x: currentRect.minX - RATE, y: currentRect.maxY - RATE, width: RATE*2, height: RATE*2)
+        if currentRect.width <= RATE * 4 {
+            return CGRect(x: currentRect.minX - RATE * 2, y: currentRect.maxY - RATE, width: RATE * 2 + currentRect.width * 0.5, height: RATE * 4)
+        }
+        return CGRect(x: currentRect.minX - RATE*2, y: currentRect.maxY - RATE, width: RATE*4, height: RATE*4)
     }
     private func bottomRightCorner() -> CGRect {
-        return CGRect(x: currentRect.maxX - RATE, y: currentRect.maxY - RATE, width: RATE*2, height: RATE*2)
+        if currentRect.width <= RATE * 4 {
+            return CGRect(x: currentRect.maxX - currentRect.width*0.5, y: currentRect.maxY - RATE, width: RATE * 4, height: RATE * 4)
+        }
+        return CGRect(x: currentRect.maxX - RATE*2, y: currentRect.maxY - RATE, width: RATE*4, height: RATE*4)
     }
     /*****************************************四条边****************************************/
     private func topEdgeRect() -> CGRect {
-        return CGRect(x: currentRect.minX + RATE, y: currentRect.minY - RATE, width: currentRect.width - RATE*2, height: RATE*2)
+        return CGRect(x: currentRect.minX + RATE*2, y: currentRect.minY - RATE, width: currentRect.width - RATE*4, height: RATE*2)
     }
     private func bottomEdgeRect() -> CGRect {
-        return CGRect(x: currentRect.minX + RATE, y: currentRect.maxY - RATE , width: currentRect.width - RATE*2, height: RATE*2)
+        return CGRect(x: currentRect.minX + RATE*2, y: currentRect.maxY - RATE , width: currentRect.width - RATE*4, height: RATE*2)
     }
     private func leftEdgeRect() -> CGRect {
         return CGRect(x: currentRect.minX - RATE, y: currentRect.minY + RATE, width: currentRect.minY + RATE, height: currentRect.height - RATE*2)
