@@ -24,6 +24,7 @@ class PictureView: UIView,UIScrollViewDelegate {
     let MINSIZE : CGSize = CGSize(width: 10, height: 10) // 最小宽度
     lazy var rectArray = { return NSMutableArray() }() // 记录所画框的坐标
     lazy var colorArray = { return NSMutableArray() }() // 记录随机颜色
+    let SMALLCIRCLE : CGFloat = 10
     
     private var isInitStart = false // 首个坐标初始化
     private let LINEWIDTH: CGFloat = 2 // 线的宽度
@@ -35,6 +36,10 @@ class PictureView: UIView,UIScrollViewDelegate {
     var bottomView = UIView()
     var bottomCorner = UIView()
     var bottomLeftCornerView = UIView()
+    var topLeftSmall = UIView()
+    var topRightSmall = UIView()
+    var bottomLeftSmall = UIView()
+    var bottomRightSmall = UIView()
     override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -52,6 +57,28 @@ class PictureView: UIView,UIScrollViewDelegate {
 //        self.addSubview(bottomCorner)
 //        bottomLeftCornerView.backgroundColor = UIColor.green
 //        self.addSubview(bottomLeftCornerView)
+        
+        self.addSubview(topLeftSmall)
+        topLeftSmall.backgroundColor = UIColor.red
+        topLeftSmall.layer.cornerRadius = SMALLCIRCLE*0.5;
+        topLeftSmall.layer.masksToBounds = true
+        
+        self.addSubview(topRightSmall)
+        topRightSmall.backgroundColor = UIColor.red
+        topRightSmall.layer.cornerRadius = SMALLCIRCLE*0.5;
+        topRightSmall.layer.masksToBounds = true
+        
+        self.addSubview(bottomLeftSmall)
+        bottomLeftSmall.backgroundColor = UIColor.red
+        bottomLeftSmall.layer.cornerRadius = SMALLCIRCLE*0.5;
+        bottomLeftSmall.layer.masksToBounds = true
+        
+        self.addSubview(bottomRightSmall)
+        bottomRightSmall.backgroundColor = UIColor.red
+        bottomRightSmall.layer.cornerRadius = SMALLCIRCLE*0.5;
+        bottomRightSmall.layer.masksToBounds = true
+        
+//        setRadius()
         
         // 手势添加
         addGesture()
@@ -72,11 +99,20 @@ class PictureView: UIView,UIScrollViewDelegate {
         context?.setStrokeColor(red: 1, green: 0, blue: 0, alpha: 1)
         context?.stroke(currentRect)
         
-        topView.frame = topEdgeRect()
-        bottomView.frame = bottomEdgeRect()
+//
+//        topView.frame = topEdgeRect()
+//        bottomView.frame = bottomEdgeRect()
+//
+//        bottomCorner.frame = topRightCorner()
+//        bottomLeftCornerView.frame = topLeftCorner()
         
-        bottomCorner.frame = topRightCorner()
-        bottomLeftCornerView.frame = topLeftCorner()
+        
+        if currentRect != CGRect.zero{
+            topLeftSmall.frame = topLeft()
+            topRightSmall.frame = topRight()
+            bottomLeftSmall.frame = bottomLeft()
+            bottomRightSmall.frame = bottomRight()
+        }
     }
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -84,6 +120,10 @@ class PictureView: UIView,UIScrollViewDelegate {
     // 保存当前并开始下一个  同时还需要更新界面
     public func saveAndNext() -> Void {
         currentRect = CGRect.zero
+        topLeftSmall.frame = CGRect.zero
+        topRightSmall.frame = CGRect.zero
+        bottomLeftSmall.frame = CGRect.zero
+        bottomRightSmall.frame = CGRect.zero
         setNeedsDisplay()
         // 重置初始化状态
         isInitStart = false
@@ -124,6 +164,7 @@ class PictureView: UIView,UIScrollViewDelegate {
             panningMode = getPannigModeByPoint(point)
             panEdge(sender)
         }
+        print("\(panningMode)")
         // 设置手势的偏移量（非常重要）
         sender.setTranslation(CGPoint.zero, in: self)
     }
@@ -342,5 +383,22 @@ class PictureView: UIView,UIScrollViewDelegate {
     private func centerRect() -> CGRect {
         return CGRect(x: currentRect.minX + RATE , y: currentRect.minY + RATE, width: currentRect.width - RATE*2, height: currentRect.height - RATE*2)
     }
-
+    /*****************************************四个角****************************************/
+    private func topLeft() -> CGRect{
+        return CGRect(x: currentRect.minX - SMALLCIRCLE*0.5, y: currentRect.minY - SMALLCIRCLE*0.5, width: SMALLCIRCLE, height: SMALLCIRCLE)
+    }
+    private func topRight() -> CGRect {
+        return CGRect(x: currentRect.maxX - SMALLCIRCLE*0.5, y: currentRect.minY-SMALLCIRCLE*0.5, width: SMALLCIRCLE, height: SMALLCIRCLE)
+    }
+    private func bottomLeft() -> CGRect {
+        return CGRect(x: currentRect.minX - SMALLCIRCLE*0.5, y: currentRect.maxY - SMALLCIRCLE*0.5, width: SMALLCIRCLE, height: SMALLCIRCLE)
+    }
+    private func bottomRight() -> CGRect {
+        return CGRect(x: currentRect.maxX - SMALLCIRCLE*0.5, y: currentRect.maxY-SMALLCIRCLE*0.5, width: SMALLCIRCLE, height: SMALLCIRCLE)
+    }
+}
+extension UIView{
+    func setRadius() -> Void {
+        print("hello world")
+    }
 }
