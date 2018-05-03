@@ -7,7 +7,7 @@
 //
 
 import UIKit
-
+typealias BlcokImage = () -> (CGRect,UIImage)
 class LabelPictureView: UIView,UIScrollViewDelegate {
     var imageName : String? {
         willSet{}
@@ -58,6 +58,13 @@ class LabelPictureView: UIView,UIScrollViewDelegate {
         drawImage()
         // 再次初始化蒙版
         overPictureView?.saveAndNext()
+    }
+    public func getPicture(complete: BlcokImage) -> Void{
+        
+    }
+    public func getLabelPicture() -> UIImage{
+        print("hello \(overPictureView?.currentRect)")
+        return UIImage()
     }
     public func finishDraw() -> NSMutableArray {
         // 保存最后一个标注信息

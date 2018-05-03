@@ -31,12 +31,26 @@ class ViewController: UIViewController {
         reset1.setTitle("完成", for: .normal)
         reset1.addTarget(self, action: #selector(finish(_:)), for: .touchUpInside)
         view.addSubview(reset1)
+        
+        
+        
+        let reset2 = UIButton(type: .system)
+        reset2.frame = CGRect(x: 0, y: 200, width: 100, height: 40)
+        reset2.center.x = view.center.x
+        reset2.setTitle("获取图片", for: .normal)
+        reset2.addTarget(self, action: #selector(getImage(_:)), for: .touchUpInside)
+        view.addSubview(reset2)
+        
     }
     @objc func resetButtonClicked(_ sender: UIButton) -> Void {
         labelPicture.saveAndNext()
     }
     @objc func finish(_ sender: UIButton) -> Void {
         print("\(labelPicture.finishDraw())")
+    }
+    @objc func getImage(_ sender: UIButton) ->Void{
+         print("\(labelPicture.getLabelPicture())")
+        
     }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()

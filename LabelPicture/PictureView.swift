@@ -57,29 +57,8 @@ class PictureView: UIView,UIScrollViewDelegate {
 //        self.addSubview(bottomCorner)
 //        bottomLeftCornerView.backgroundColor = UIColor.green
 //        self.addSubview(bottomLeftCornerView)
-        
-        self.addSubview(topLeftSmall)
-        topLeftSmall.backgroundColor = UIColor.red
-        topLeftSmall.layer.cornerRadius = SMALLCIRCLE*0.5;
-        topLeftSmall.layer.masksToBounds = true
-        
-        self.addSubview(topRightSmall)
-        topRightSmall.backgroundColor = UIColor.red
-        topRightSmall.layer.cornerRadius = SMALLCIRCLE*0.5;
-        topRightSmall.layer.masksToBounds = true
-        
-        self.addSubview(bottomLeftSmall)
-        bottomLeftSmall.backgroundColor = UIColor.red
-        bottomLeftSmall.layer.cornerRadius = SMALLCIRCLE*0.5;
-        bottomLeftSmall.layer.masksToBounds = true
-        
-        self.addSubview(bottomRightSmall)
-        bottomRightSmall.backgroundColor = UIColor.red
-        bottomRightSmall.layer.cornerRadius = SMALLCIRCLE*0.5;
-        bottomRightSmall.layer.masksToBounds = true
-        
-//        setRadius()
-        
+        // 添加红色小点
+        addSmallDot()
         // 手势添加
         addGesture()
     }
@@ -102,11 +81,11 @@ class PictureView: UIView,UIScrollViewDelegate {
 //
 //        topView.frame = topEdgeRect()
 //        bottomView.frame = bottomEdgeRect()
-//
+
 //        bottomCorner.frame = topRightCorner()
 //        bottomLeftCornerView.frame = topLeftCorner()
         
-        
+        // 更新红点的位置
         if currentRect != CGRect.zero{
             topLeftSmall.frame = topLeft()
             topRightSmall.frame = topRight()
@@ -164,7 +143,6 @@ class PictureView: UIView,UIScrollViewDelegate {
             panningMode = getPannigModeByPoint(point)
             panEdge(sender)
         }
-        print("\(panningMode)")
         // 设置手势的偏移量（非常重要）
         sender.setTranslation(CGPoint.zero, in: self)
     }
@@ -396,9 +374,29 @@ class PictureView: UIView,UIScrollViewDelegate {
     private func bottomRight() -> CGRect {
         return CGRect(x: currentRect.maxX - SMALLCIRCLE*0.5, y: currentRect.maxY-SMALLCIRCLE*0.5, width: SMALLCIRCLE, height: SMALLCIRCLE)
     }
+    private func addSmallDot() -> Void{
+        // 上左
+        self.addSubview(topLeftSmall)
+        topLeftSmall.backgroundColor = UIColor.red
+        topLeftSmall.setRadius(SMALLCIRCLE*0.5)
+        // 上右
+        self.addSubview(topRightSmall)
+        topRightSmall.backgroundColor = UIColor.red
+        topRightSmall.setRadius(SMALLCIRCLE*0.5)
+        // 下左
+        self.addSubview(bottomLeftSmall)
+        bottomLeftSmall.backgroundColor = UIColor.red
+        bottomLeftSmall.setRadius(SMALLCIRCLE*0.5)
+        // 下右
+        self.addSubview(bottomRightSmall)
+        bottomRightSmall.backgroundColor = UIColor.red
+        bottomRightSmall.setRadius(SMALLCIRCLE*0.5)
+    }
 }
+//  Extension
 extension UIView{
-    func setRadius() -> Void {
-        print("hello world")
+    func setRadius(_ radius: CGFloat) {
+        self.layer.cornerRadius = radius
+        self.layer.masksToBounds = true
     }
 }
