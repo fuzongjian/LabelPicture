@@ -13,6 +13,9 @@ public func saveAndNext() -> Void{}
 
 // 完成标注
 public func finishDraw() -> NSMutableArray{}
+
+// 截取第一个框框的图片
+public func getPicture(complete: @escaping((CGRect,UIImage) ->())) -> Void{}
 ```
 
 

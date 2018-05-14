@@ -59,13 +59,24 @@ class LabelPictureView: UIView,UIScrollViewDelegate {
         // 再次初始化蒙版
         overPictureView?.saveAndNext()
     }
-    public func getPicture(complete: BlcokImage) -> Void{
-        
+    public func getPicture(complete: @escaping((CGRect,UIImage) ->())) -> Void{
+        // 这里只截取第一张
+        if rectArray.count != 0 {
+            print("origin image size \(String(describing: imageView.image?.size))")
+            var frame = rectArray[0] as! CGRect
+            frame.origin.x /= scale!
+            frame.origin.y /= scale!
+            frame.size.width /= scale!
+            frame.size.height /= scale!
+            
+            UIGraphicsBeginImageContext((frame.size))
+            imageView.image?.draw(in: CGRect(x: -frame.minX, y: -frame.minY, width: (imageView.image?.size.width)!, height: (imageView.image?.size.height)!))
+            let newImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            complete(frame,newImage!)
+        }
     }
-    public func getLabelPicture() -> UIImage{
-        print("hello \(overPictureView?.currentRect)")
-        return UIImage()
-    }
+    
     public func finishDraw() -> NSMutableArray {
         // 保存最后一个标注信息
         let rect = overPictureView?.currentRect

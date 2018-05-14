@@ -10,6 +10,7 @@ import UIKit
 
 class ViewController: UIViewController {
     lazy var labelPicture = { return LabelPictureView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: 300)) }()
+    lazy var displayImage = { return UIImageView(frame: CGRect(x: 10, y: 550, width: 200, height: 200)) }()
     override func viewDidLoad() {
         super.viewDidLoad()
         labelPicture.center = view.center
@@ -41,6 +42,9 @@ class ViewController: UIViewController {
         reset2.addTarget(self, action: #selector(getImage(_:)), for: .touchUpInside)
         view.addSubview(reset2)
         
+        
+        view.addSubview(displayImage)
+        
     }
     @objc func resetButtonClicked(_ sender: UIButton) -> Void {
         labelPicture.saveAndNext()
@@ -49,7 +53,11 @@ class ViewController: UIViewController {
         print("\(labelPicture.finishDraw())")
     }
     @objc func getImage(_ sender: UIButton) ->Void{
-         print("\(labelPicture.getLabelPicture())")
+        labelPicture.getPicture { (frame, image) -> () in
+            print("\(frame)---\(image)")
+            self.displayImage.image = image
+        }
+        
         
     }
     override func didReceiveMemoryWarning() {
