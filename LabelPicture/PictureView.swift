@@ -36,6 +36,7 @@ class PictureView: UIView,UIScrollViewDelegate {
     var bottomView = UIView()
     var bottomCorner = UIView()
     var bottomLeftCornerView = UIView()
+    var centerView = UIView()
     var topLeftSmall = UIView()
     var topRightSmall = UIView()
     var bottomLeftSmall = UIView()
@@ -49,14 +50,19 @@ class PictureView: UIView,UIScrollViewDelegate {
         self.backgroundColor = UIColor.clear
 //        currentRect = CGRect(x: 100, y: 100, width: 150, height: 150)
         
-//        topView.backgroundColor = UIColor.blue
-//        self.addSubview(topView)
-//        bottomView.backgroundColor = UIColor.brown
-//        self.addSubview(bottomView)
-//        bottomCorner.backgroundColor = UIColor.black
-//        self.addSubview(bottomCorner)
-//        bottomLeftCornerView.backgroundColor = UIColor.green
-//        self.addSubview(bottomLeftCornerView)
+        topView.backgroundColor = UIColor.blue
+        self.addSubview(topView)
+        bottomView.backgroundColor = UIColor.brown
+        self.addSubview(bottomView)
+        bottomCorner.backgroundColor = UIColor.black
+        self.addSubview(bottomCorner)
+        bottomLeftCornerView.backgroundColor = UIColor.green
+        self.addSubview(bottomLeftCornerView)
+        
+        
+        centerView.backgroundColor = UIColor.red
+        self.addSubview(centerView)
+        
         // 添加红色小点
         addSmallDot()
         // 手势添加
@@ -79,11 +85,12 @@ class PictureView: UIView,UIScrollViewDelegate {
         context?.stroke(currentRect)
         
 //
-//        topView.frame = topEdgeRect()
-//        bottomView.frame = bottomEdgeRect()
+        topView.frame = topEdgeRect()
+        bottomView.frame = bottomEdgeRect()
 
-//        bottomCorner.frame = topRightCorner()
-//        bottomLeftCornerView.frame = topLeftCorner()
+        bottomCorner.frame = topRightCorner()
+        bottomLeftCornerView.frame = topLeftCorner()
+        centerView.frame = centerRect()
         
         // 更新红点的位置
         if currentRect != CGRect.zero{
@@ -320,6 +327,7 @@ class PictureView: UIView,UIScrollViewDelegate {
         return .none
     }
     /*****************************************四个角****************************************/
+    // 需要考虑当其非常窄的时候
     private func topLeftCorner() -> CGRect {
         if currentRect.width <= RATE * 4 {
             return CGRect(x: currentRect.minX - RATE*2, y: currentRect.minY - RATE*3, width: currentRect.width*0.5+RATE*2, height: RATE*4)
