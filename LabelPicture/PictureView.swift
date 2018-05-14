@@ -37,6 +37,9 @@ class PictureView: UIView,UIScrollViewDelegate {
     var bottomCorner = UIView()
     var bottomLeftCornerView = UIView()
     var centerView = UIView()
+    var leftView = UIView()
+    
+    
     var topLeftSmall = UIView()
     var topRightSmall = UIView()
     var bottomLeftSmall = UIView()
@@ -50,18 +53,19 @@ class PictureView: UIView,UIScrollViewDelegate {
         self.backgroundColor = UIColor.clear
 //        currentRect = CGRect(x: 100, y: 100, width: 150, height: 150)
         
-        topView.backgroundColor = UIColor.blue
-        self.addSubview(topView)
-        bottomView.backgroundColor = UIColor.brown
-        self.addSubview(bottomView)
-        bottomCorner.backgroundColor = UIColor.black
-        self.addSubview(bottomCorner)
-        bottomLeftCornerView.backgroundColor = UIColor.green
-        self.addSubview(bottomLeftCornerView)
-        
-        
-        centerView.backgroundColor = UIColor.red
-        self.addSubview(centerView)
+//        topView.backgroundColor = UIColor.blue
+//        self.addSubview(topView)
+//        bottomView.backgroundColor = UIColor.brown
+//        self.addSubview(bottomView)
+//        bottomCorner.backgroundColor = UIColor.black
+//        self.addSubview(bottomCorner)
+//        bottomLeftCornerView.backgroundColor = UIColor.green
+//        self.addSubview(bottomLeftCornerView)
+//        leftView.backgroundColor = UIColor.yellow
+//        self.addSubview(leftView)
+//
+//        centerView.backgroundColor = UIColor.red
+//        self.addSubview(centerView)
         
         // 添加红色小点
         addSmallDot()
@@ -84,13 +88,13 @@ class PictureView: UIView,UIScrollViewDelegate {
         context?.setStrokeColor(red: 1, green: 0, blue: 0, alpha: 1)
         context?.stroke(currentRect)
         
-//
-        topView.frame = topEdgeRect()
-        bottomView.frame = bottomEdgeRect()
 
-        bottomCorner.frame = topRightCorner()
-        bottomLeftCornerView.frame = topLeftCorner()
-        centerView.frame = centerRect()
+//        topView.frame = rightEdgeRect()
+//        bottomCorner.frame = topRightCorner()
+//        bottomLeftCornerView.frame = topLeftCorner()
+//        centerView.frame = centerRect()
+//        leftView.frame = topEdgeRect()
+//        bottomView.frame = bottomEdgeRect()
         
         // 更新红点的位置
         if currentRect != CGRect.zero{
@@ -354,20 +358,32 @@ class PictureView: UIView,UIScrollViewDelegate {
     }
     /*****************************************四条边****************************************/
     private func topEdgeRect() -> CGRect {
-        return CGRect(x: currentRect.minX + RATE*2, y: currentRect.minY - RATE, width: currentRect.width - RATE*4, height: RATE*2)
+        if currentRect.height <= RATE*2 {
+            return CGRect(x: currentRect.minX + RATE*2, y: currentRect.minY - RATE*2, width: currentRect.width - RATE*4, height: RATE*2)
+        }
+        return CGRect(x: currentRect.minX + RATE*2, y: currentRect.minY - RATE*2, width: currentRect.width - RATE*4, height: RATE*3)
     }
     private func bottomEdgeRect() -> CGRect {
-        return CGRect(x: currentRect.minX + RATE*2, y: currentRect.maxY - RATE , width: currentRect.width - RATE*4, height: RATE*2)
+        if currentRect.height <= RATE*2 {
+            return CGRect(x: currentRect.minX + RATE*2, y: currentRect.maxY, width: currentRect.width - RATE*4, height: RATE*2)
+        }
+        return CGRect(x: currentRect.minX + RATE*2, y: currentRect.maxY - RATE , width: currentRect.width - RATE*4, height: RATE*3)
     }
     private func leftEdgeRect() -> CGRect {
-        return CGRect(x: currentRect.minX - RATE, y: currentRect.minY + RATE, width: currentRect.minY + RATE, height: currentRect.height - RATE*2)
+        if currentRect.width <= RATE*2 {
+            return CGRect(x: currentRect.minX-RATE*2, y: currentRect.minY + RATE, width: RATE*2, height: currentRect.height-RATE*2)
+        }
+        return CGRect(x: currentRect.minX - RATE*2, y: currentRect.minY + RATE, width: RATE*3, height: currentRect.height - RATE*2)
     }
     private func rightEdgeRect() -> CGRect {
-        return CGRect(x:currentRect.maxX - RATE, y: currentRect.minY + RATE, width: RATE*2, height: currentRect.height - RATE*2)
+        if currentRect.width <= RATE*2 {
+            return CGRect(x: currentRect.maxX, y: currentRect.minY + RATE, width: RATE * 2, height: currentRect.height - RATE * 2)
+        }
+        return CGRect(x:currentRect.maxX - RATE, y: currentRect.minY + RATE, width: RATE*3, height: currentRect.height - RATE*2)
     }
     /*****************************************中间区域****************************************/
     private func centerRect() -> CGRect {
-        return CGRect(x: currentRect.minX + RATE , y: currentRect.minY + RATE, width: currentRect.width - RATE*2, height: currentRect.height - RATE*2)
+        return CGRect(x: leftEdgeRect().maxX , y: topEdgeRect().maxY, width: rightEdgeRect().minX-leftEdgeRect().maxX, height: bottomEdgeRect().minY-topEdgeRect().maxY)
     }
     /*****************************************四个角****************************************/
     private func topLeft() -> CGRect{
