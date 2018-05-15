@@ -9,8 +9,11 @@
 import UIKit
 
 class ViewController: UIViewController {
-    lazy var labelPicture = { return LabelPictureView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.size.width, height: 300)) }()
-    lazy var displayImage = { return UIImageView(frame: CGRect(x: 10, y: 550, width: 200, height: 200)) }()
+   
+    let SCREENWIDTH = UIScreen.main.bounds.size.width
+    let SCREENHEIGHT = UIScreen.main.bounds.size.height
+    lazy var labelPicture = { return LabelPictureView(frame: CGRect(x: 0, y: 0, width: SCREENWIDTH, height: 300)) }()
+    lazy var displayImage = { return UIImageView(frame: CGRect(x: 10, y: SCREENHEIGHT*0.5+160, width: 200, height: SCREENHEIGHT*0.5-170)) }()
     override func viewDidLoad() {
         super.viewDidLoad()
         labelPicture.center = view.center
@@ -18,17 +21,19 @@ class ViewController: UIViewController {
         labelPicture.imageName = "test"
         view.addSubview(labelPicture)
         
+        
+        
         let reset = UIButton(type: .system)
-        reset.frame = CGRect(x: 0, y: 100, width: 100, height: 40)
-        reset.center.x = view.center.x
+        reset.frame = CGRect(x: 0, y: 100, width: SCREENWIDTH/3, height: 40)
+        
         reset.setTitle("下一个", for: .normal)
         reset.addTarget(self, action: #selector(resetButtonClicked(_:)), for: .touchUpInside)
         view.addSubview(reset)
         
         
         let reset1 = UIButton(type: .system)
-        reset1.frame = CGRect(x: 0, y: 150, width: 100, height: 40)
-        reset1.center.x = view.center.x
+        reset1.frame = CGRect(x: SCREENWIDTH/3, y: 100, width: SCREENWIDTH/3, height: 40)
+        
         reset1.setTitle("完成", for: .normal)
         reset1.addTarget(self, action: #selector(finish(_:)), for: .touchUpInside)
         view.addSubview(reset1)
@@ -36,13 +41,13 @@ class ViewController: UIViewController {
         
         
         let reset2 = UIButton(type: .system)
-        reset2.frame = CGRect(x: 0, y: 200, width: 100, height: 40)
-        reset2.center.x = view.center.x
+        reset2.frame = CGRect(x: SCREENWIDTH*2/3, y:100, width: SCREENWIDTH/3, height: 40)
+        
         reset2.setTitle("获取图片", for: .normal)
         reset2.addTarget(self, action: #selector(getImage(_:)), for: .touchUpInside)
         view.addSubview(reset2)
         
-        
+        displayImage.contentMode = .scaleAspectFit
         view.addSubview(displayImage)
         
     }
