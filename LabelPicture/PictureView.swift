@@ -122,14 +122,14 @@ class PictureView: UIView,UIScrollViewDelegate {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
         // 记录第一个触摸点
-        if touches.count == 1{
-            guard let p = touches.first?.location(in: self)else{ return }
-            currentPoint = p
-            if isInitStart == false{
-                currentRect = CGRect(origin: p, size: CGSize(width: 5, height: 5))
-                isInitStart = true
-            }
-        }
+//        if touches.count == 1{
+//            guard let p = touches.first?.location(in: self)else{ return }
+//            currentPoint = p
+//            if isInitStart == false{
+//                currentRect = CGRect(origin: p, size: CGSize(width: 5, height: 5))
+//                isInitStart = true
+//            }
+//        }
     }
     // 添加手势
     func addGesture() -> Void {
@@ -145,17 +145,32 @@ class PictureView: UIView,UIScrollViewDelegate {
     @objc func panGestureClick(_ sender: UIPanGestureRecognizer) -> Void {
         // 在这里应该先判断在那个区域，然后在根据情况进行拉长或收缩
         let point = sender.location(in: self)
-        if isInCenterContainsPoint(point) {// 整体移动
-            panCenter(sender)
-        } else if isCornerContainsPoint(point){// 边角处移动
-            panningMode = getPannigModeByPoint(point)
-            panCorner(sender)
-        }else if isEdgeContainsPoint(point){ // 边边移动
-            panningMode = getPannigModeByPoint(point)
-            panEdge(sender)
+        if currentRect == CGRect.zero{
+            print("hello start")
+            if sender.state == .began{
+                self.currentPoint = point;
+            }else if sender.state == .changed{
+                let X = currentPoint.x
+                let Y = currentPoint.y
+                let W = point.x - currentPoint.x
+                let H = point.y - currentPoint.y
+                currentRect = CGRect(x: X, y: Y, width: W, height: H)
+            }
+        }else{
+            if isInCenterContainsPoint(point) {// 整体移动
+                panCenter(sender)
+            } else if isCornerContainsPoint(point){// 边角处移动
+                panningMode = getPannigModeByPoint(point)
+                panCorner(sender)
+            }else if isEdgeContainsPoint(point){ // 边边移动
+                panningMode = getPannigModeByPoint(point)
+                panEdge(sender)
+            }
+            // 设置手势的偏移量（非常重要）
+            sender.setTranslation(CGPoint.zero, in: self)
         }
-        // 设置手势的偏移量（非常重要）
-        sender.setTranslation(CGPoint.zero, in: self)
+        
+       
     }
     // 角运动
     private func panCorner(_ sender: UIPanGestureRecognizer) -> Void {
